@@ -30,7 +30,13 @@ contract LogicManager is Owned {
     mapping (address => pending) public pendingLogics;
 
     // pending time before updated logics take effect
-    uint public pendingTime;
+    struct pendingTime {
+        uint curPendingTime;
+        uint nextPendingTime;
+        uint dueTime;
+    }
+
+    pendingTime public pt;
 
     // how many authorized logics
     uint public logicCount;
@@ -44,8 +50,19 @@ contract LogicManager is Owned {
         }
         authorizedLogics = _initialLogics;
 
-        // pendingTime: 4 days for mainnet, 4 minutes for ropsten testnet
-        pendingTime = _pendingTime;
+        pt.curPendingTime = _pendingTime;
+        pt.nextPendingTime = _pendingTime;
+        pt.dueTime = now;
+    }
+
+    function submitUpdatePendingTime(uint _pendingTime) external onlyOwner {
+        pt.nextPendingTime = _pendingTime;
+        pt.dueTime = pt.curPendingTime + now;
+    }
+
+    function triggerUpdatePendingTime() external {
+        require(pt.dueTime <= now, "too early to trigger updatePendingTime");
+        pt.curPendingTime = pt.nextPendingTime;
     }
 
     function isAuthorized(address _logic) external view returns (bool) {
@@ -59,7 +76,7 @@ contract LogicManager is Owned {
     function submitUpdate(address _logic, bool _value) external onlyOwner {
         pending storage p = pendingLogics[_logic];
         p.value = _value;
-        p.dueTime = now + pendingTime;
+        p.dueTime = now + pt.curPendingTime;
         emit UpdateLogicSubmitted(_logic, _value);
     }
 
