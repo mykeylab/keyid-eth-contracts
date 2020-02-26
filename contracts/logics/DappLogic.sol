@@ -1,9 +1,12 @@
 pragma solidity ^0.5.4;
 
 import "./base/BaseLogic.sol";
+import "../utils/RLPReader.sol";
 
 contract DappLogic is BaseLogic {
 
+    using RLPReader for RLPReader.RLPItem;
+    using RLPReader for bytes;
     /*
     index 0: admin key
           1: asset(transfer)
@@ -58,6 +61,23 @@ contract DappLogic is BaseLogic {
         // solium-disable-next-line security/no-low-level-calls
         (success,) = _account.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _target, _value, _methodData));
         require(success, "calling invoke failed");
+    }
+
+    // called from 'enter'
+    // call serveral other contracts at a time
+    // rlp encode _methodData array into rlpBytes
+    function callMultiContract(address payable _account, address[] calldata _targets, uint256[] calldata _values, bytes calldata _rlpBytes) external allowSelfCallsOnly {
+        RLPReader.RLPItem[] memory ls = _rlpBytes.toRlpItem().toList();
+
+        uint256 len = _targets.length;
+        require(len == _values.length && len == ls.length, "length mismatch");
+        for (uint256 i = 0; i < len; i++) {
+            bool success;
+            RLPReader.RLPItem memory item = ls[i];
+            // solium-disable-next-line security/no-low-level-calls
+            (success,) = _account.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _targets[i], _values[i], bytes(item.toBytes())));
+            require(success, "calling invoke failed");
+        }
     }
 
 }
