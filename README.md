@@ -3,10 +3,11 @@
 Contract     | Mainnet Address  | Description 
 ------------- | ------------- | ------------- 
 LogicManager  | 0xDF8aC96BC9198c610285b3d1B29de09621B04528 | Management of all logic modules
-AccountLogic  | 0x52dAb11c6029862eBF1E65A4d5c30641f5FbD957 | Logic of account management
+AccountLogic (to be deprecated)  | 0x52dAb11c6029862eBF1E65A4d5c30641f5FbD957 | Logic of account management
+new AccountLogic  | 0xe9737a94eABf50D4E252D7ab68E006639eA73E0D | Logic of account management
 TransferLogic  | 0x1C2349ACBb7f83d07577692c75B6D7654899BF10 | Logic of transfering assets
 DualsigsLogic  | 0x039aA54fEbe98AaaDb91aE2b1Db7aA00a82F8571 | Logic of dual-signature operations by user and emergency contact
-DappLogic (to be deprecated)  | 0x2cd784297B10a53003092d6110c83C4092B2fbd2 | Logic of interacting with Dapp contract
+DappLogic (deprecated)  | 0x2cd784297B10a53003092d6110c83C4092B2fbd2 | Logic of interacting with Dapp contract
 new DappLogic  | 0x847f5AbbA6A36c727eCfF76784eE3648BA868808 | Logic of interacting with Dapp contract
 AccountCreator  | 0x185479FB2cAEcbA11227db4186046496D6230243 | Account creation
 Account  | 0xEf004D954999EB9162aeB3989279eFf2161D5095 | Account template
