@@ -1,4 +1,4 @@
-#Overview  
+# Overview  
 MYKEY is a decentralized smart wallet, which means MYKEY account is a smart contract, rather than an EOA address. This highly improves security and usability.  
 MYKEY has 3 main characteristics:  
 - **Separated permissions**. Various action permissions(like transferring asset, account management, etc.) are owned by separated multiple keys.  
@@ -21,10 +21,10 @@ DualsigsLogic  | 0x039aA54fEbe98AaaDb91aE2b1Db7aA00a82F8571
 TransferLogic  | 0x1C2349ACBb7f83d07577692c75B6D7654899BF10 
 DappLogic  | 0x847f5AbbA6A36c727eCfF76784eE3648BA868808 
 
-#Account Module
+# Account Module
 Account Module is composed with account template contract(Account.sol) and account proxy contract(AccountProxy.sol). Account template contract is the specific implementation of MYKEY account, while account proxy contract delegates all invocations to account template contract, executing specific operations. This proxy mechanism can save gas costs of creating a huge amount of accounts.  
 
-##Account.sol
+## Account.sol
 Description: account template contract with specific implementation of MYKEY account  
 `function init()`: initialization after account creation, initializing account in Account Storage Module and Logic Module  
 `function invoke()`: invoke arbitrary external contracts  
@@ -32,18 +32,18 @@ Description: account template contract with specific implementation of MYKEY acc
 `function changeManager()`: change account's Logic Management Module  
 `function ()`: fallback function, delegating invocation to Logic Module  
 
-##AccountProxy.sol  
+## AccountProxy.sol  
 Description: account proxy contract  
 `function ()`: fallback function, delegating invocation to account template contract  
 
-##AccountCreator.sol
+## AccountCreator.sol
 Description: account creation contract  
 `function createAccount()`: create accounts(proxy contract) and initialize accounts  
 `function setAddresses()`: set addresses for account creation  
 
-#Account Storage Module  
+# Account Storage Module  
 Account Storage Module stores data of every MYKEY account, including a set of public keys, emergency contacts, delayed actions and multi-sig proposals. Only invocations sent from Logic Module are allowed to call get/set functions in Account Storage Module.  
-##AccountStorage.sol  
+## AccountStorage.sol  
 `function initAccount()`: initialization of account storage  
 `function getKeyData()`: get key data  
 `function setKeyData()`: set key data  
@@ -61,14 +61,14 @@ Account Storage Module stores data of every MYKEY account, including a set of pu
 `function setProposalData()`: set a proposal  
 `function clearProposalData()`: remove a proposal  
 
-#Logic Management Module  
+# Logic Management Module  
 Logic contracts authorized by Logic Management Module can be added or removed with delay, and the pending time can also be altered with delay.  
 Any update of logic contracts should follow [strict procedures](https://docs.mykey.org/v/English/key-id/keyid-contract-upgrade-process).  
 Below is a diagram showing the procedure of logic update:  
 
 ![MYKEY logic update diagram](https://github.com/mykeylab/keyid-eth-contracts/blob/master/images/MYKEY%20logic%20update%20diagram.png)
 
-##LogicManager.sol  
+## LogicManager.sol  
 Description: management of all logic contracts  
 `function submitUpdatePendingTime()`: alter pending time (with delay)  
 `function triggerUpdatePendingTime()`: trigger updating pending time  
@@ -78,11 +78,11 @@ Description: management of all logic contracts
 `function isAuthorized()`: check if a contract is an authorized logic contract  
 `function getAuthorizedLogics()`: get all authorized logic contracts  
 
-#Logic Module  
+# Logic Module  
 Logic Module contains logic contracts, which implements specific operations like replacing keys, freezing account, transferring asset and calling external contract etc. In every logic contract, there is an entry method(`function enter()`) which validates signature. So the entry method must be called first before executing any operation.  
 Currently, there are 4 logic contracts in Logic Module: ***AccountLogic, DualsigsLogic, TransferLogic and DappLogic.***  
 
-##AccountLogic.sol  
+## AccountLogic.sol  
 Description: implement logic of account management  
 `function changeAdminKey()`: change admin key (with delay)  
 `function triggerChangeAdminKey()`: trigger changing admin key  
@@ -102,7 +102,7 @@ Description: implement logic of account management
 `function approveProposal()`: approve a proposal  
 `function executeProposal()`: execute a proposal  
 
-##DualsigsLogic.sol  
+## DualsigsLogic.sol  
 Description: implement logic of dual signatures  
 `function changeAdminKeyWithoutDelay()`: change admin key immediately  
 `function changeAllOperationKeysWithoutDelay()`: change all operation keys immediately  
@@ -111,7 +111,7 @@ Description: implement logic of dual signatures
 `function proposeByBoth()`: user proposes a proposal together with an emergency contact  
 `function executeProposal()`: execute a proposal  
 
-##TransferLogic.sol  
+## TransferLogic.sol  
 Description: implement logic of transferring asset  
 `function transferEth()`: transfer ETH  
 `function transferErc20()`: transfer ERC20 token  
@@ -119,7 +119,7 @@ Description: implement logic of transferring asset
 `function transferNft()`: transfer Non-fungible token  
 `function transferApprovedNft()`: transfer approved Non-fungible token
 
-##DappLogic.sol  
+## DappLogic.sol  
 Description: implement logic of interacting with external contracts  
 `function callContract()`: call external contract  
 `function callMultiContract()`: call multiple external contracts atomically  
