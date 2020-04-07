@@ -7,6 +7,15 @@ import "./base/AccountBaseLogic.sol";
 */
 contract AccountLogic is AccountBaseLogic {
 
+    /*
+    index 0: admin key
+          1: asset(transfer)
+          2: adding
+          3: reserved(dapp)
+          4: assist
+     */
+    uint constant internal DAPP_KEY_INDEX = 3;
+
 	// Equals to bytes4(keccak256("addOperationKey(address,address)"))
 	bytes4 private constant ADD_OPERATION_KEY = 0x9a7f6101;
 	// Equals to bytes4(keccak256("proposeAsBackup(address,address,bytes)"))
@@ -14,12 +23,31 @@ contract AccountLogic is AccountBaseLogic {
 	// Equals to bytes4(keccak256("approveProposal(address,address,address,bytes)"))
 	bytes4 private constant APPROVE_PROPOSAL = 0x3713f742;
 
+    //0x20c13b0b
+    bytes4 private constant ERC1271_ISVALIDSIGNATURE_BYTES = bytes4(keccak256("isValidSignature(bytes,bytes)"));
+	//0x1626ba7e
+    bytes4 private constant ERC1271_ISVALIDSIGNATURE_BYTES32 = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
+
     event AccountLogicEntered(bytes data, uint256 indexed nonce);
 	event AccountLogicInitialised(address indexed account);
 	event ChangeAdminKeyTriggered(address indexed account, address pkNew);
 	event ChangeAdminKeyByBackupTriggered(address indexed account, address pkNew);
 	event ChangeAllOperationKeysTriggered(address indexed account, address[] pks);
 	event UnfreezeTriggered(address indexed account);
+
+	event ChangeAdminKey(address indexed account, address indexed pkNew);
+	event ChangeAdminKeyByBackup(address indexed account, address indexed pkNew);
+	event AddOperationKey(address indexed account, address indexed pkNew);
+	event ChangeAllOperationKeys(address indexed account, address[] pks);
+	event Freeze(address indexed account);
+	event Unfreeze(address indexed account);
+	event RemoveBackup(address indexed account, address indexed backup);
+	event CancelDelay(address indexed account, bytes4 actionId);
+	event CancelAddBackup(address indexed account, address indexed backup);
+	event CancelRemoveBackup(address indexed account, address indexed backup);
+	event ProposeAsBackup(address indexed backup, address indexed client, bytes data);
+	event ApproveProposal(address indexed backup, address indexed client, address indexed proposer, bytes data);
+	event CancelProposal(address indexed client, address indexed proposer, bytes4 proposedActionId);
 
 	// *************** Constructor ********************** //
 
@@ -32,6 +60,8 @@ contract AccountLogic is AccountBaseLogic {
     // *************** Initialization ********************* //
 
 	function initAccount(Account _account) external allowAccountCallsOnly(_account){
+		_account.enableStaticCall(address(this), ERC1271_ISVALIDSIGNATURE_BYTES);
+		_account.enableStaticCall(address(this), ERC1271_ISVALIDSIGNATURE_BYTES32);
         emit AccountLogicInitialised(address(_account));
     }
 
@@ -68,6 +98,7 @@ contract AccountLogic is AccountBaseLogic {
 		require(accountStorage.getDelayDataHash(_account, CHANGE_ADMIN_KEY) == 0, "delay data already exists");
 		bytes32 hash = keccak256(abi.encodePacked('changeAdminKey', _account, _pkNew));
 		accountStorage.setDelayData(_account, CHANGE_ADMIN_KEY, hash, now + DELAY_CHANGE_ADMIN_KEY);
+		emit ChangeAdminKey(_account, _pkNew);
 	}
 
     // called from external
@@ -96,6 +127,7 @@ contract AccountLogic is AccountBaseLogic {
 		require(accountStorage.getDelayDataHash(_account, CHANGE_ADMIN_KEY_BY_BACKUP) == 0, "delay data already exists");
 		bytes32 hash = keccak256(abi.encodePacked('changeAdminKeyByBackup', _account, _pkNew));
 		accountStorage.setDelayData(_account, CHANGE_ADMIN_KEY_BY_BACKUP, hash, now + DELAY_CHANGE_ADMIN_KEY_BY_BACKUP);
+		emit ChangeAdminKeyByBackup(_account, _pkNew);
 	}
 
     // called from external
@@ -127,6 +159,7 @@ contract AccountLogic is AccountBaseLogic {
 		require(pk == address(0), "operation key already exists");
 		accountStorage.setKeyData(_account, index, _pkNew);
 		accountStorage.increaseKeyCount(_account);
+		emit AddOperationKey(_account, _pkNew);
 	}
 
 	// *************** change all operation keys ********************** //
@@ -143,6 +176,7 @@ contract AccountLogic is AccountBaseLogic {
 		}
 		bytes32 hash = keccak256(abi.encodePacked('changeAllOperationKeys', _account, _pks));
 		accountStorage.setDelayData(_account, CHANGE_ALL_OPERATION_KEYS, hash, now + DELAY_CHANGE_OPERATION_KEY);
+		emit ChangeAllOperationKeys(_account, _pks);
 	}
 
     // called from external
@@ -172,6 +206,7 @@ contract AccountLogic is AccountBaseLogic {
 				accountStorage.setKeyStatus(_account, i, 1);
 			}
 		}
+		emit Freeze(_account);
 	}
 
     // called from 'enter'
@@ -179,6 +214,7 @@ contract AccountLogic is AccountBaseLogic {
 		require(accountStorage.getDelayDataHash(_account, UNFREEZE) == 0, "delay data already exists");
 		bytes32 hash = keccak256(abi.encodePacked('unfreeze', _account));
 		accountStorage.setDelayData(_account, UNFREEZE, hash, now + DELAY_UNFREEZE_KEY);
+		emit Unfreeze(_account);
 	}
 
     // called from external
@@ -207,6 +243,7 @@ contract AccountLogic is AccountBaseLogic {
 		require(index <= MAX_DEFINED_BACKUP_INDEX, "backup invalid or not exist");
 
 		accountStorage.setBackupExpiryDate(_account, index, now + DELAY_CHANGE_BACKUP);
+		emit RemoveBackup(_account, _backup);
 	}
 
     // return backupData index(0~5), 6 means not found
@@ -232,6 +269,7 @@ contract AccountLogic is AccountBaseLogic {
     // called from 'enter'
 	function cancelDelay(address payable _account, bytes4 _actionId) external allowSelfCallsOnly {
 		accountStorage.clearDelayData(_account, _actionId);
+		emit CancelDelay(_account, _actionId);
 	}
 
     // called from 'enter'
@@ -241,6 +279,7 @@ contract AccountLogic is AccountBaseLogic {
 		uint256 effectiveDate = accountStorage.getBackupEffectiveDate(_account, index);
 		require(effectiveDate > now, "already effective");
 		accountStorage.clearBackupData(_account, index);
+		emit CancelAddBackup(_account, _backup);
 	}
 
     // called from 'enter'
@@ -250,6 +289,7 @@ contract AccountLogic is AccountBaseLogic {
 		uint256 expiryDate = accountStorage.getBackupExpiryDate(_account, index);
 		require(expiryDate > now, "already expired");
 		accountStorage.setBackupExpiryDate(_account, index, uint256(-1));
+		emit CancelRemoveBackup(_account, _backup);
 	}
 
 	// *************** propose, approve and cancel proposal ********************** //
@@ -262,6 +302,7 @@ contract AccountLogic is AccountBaseLogic {
 		checkRelation(_client, _backup);
 		bytes32 functionHash = keccak256(_functionData);
 		accountStorage.setProposalData(_client, _backup, proposedActionId, functionHash, _backup);
+		emit ProposeAsBackup(_backup, _client, _functionData);
 	}
 
     // called from 'enter'
@@ -273,13 +314,37 @@ contract AccountLogic is AccountBaseLogic {
 		bytes32 hash = accountStorage.getProposalDataHash(_client, _proposer, proposedActionId);
 		require(hash == functionHash, "proposal unmatch");
 		accountStorage.setProposalData(_client, _proposer, proposedActionId, functionHash, _backup);
+		emit ApproveProposal(_backup, _client, _proposer, _functionData);
 	}
 
     // called from 'enter'
 	function cancelProposal(address payable _client, address _proposer, bytes4 _proposedActionId) external allowSelfCallsOnly {
 		require(_client != _proposer, "cannot cancel dual signed proposal");
 		accountStorage.clearProposalData(_client, _proposer, _proposedActionId);
+		emit CancelProposal(_client, _proposer, _proposedActionId);
 	}
+
+	// *************** Implementation of EIP1271 ********************** //
+
+    /**
+    * @dev Should return whether the signature provided is valid for the provided data.
+    * @param _data Arbitrary length data signed on the behalf of address(this)
+    * @param _signature Signature byte array associated with _data
+    */
+    function isValidSignature(bytes calldata _data, bytes calldata _signature) external view returns (bytes4) {
+        bytes32 msgHash = keccak256(abi.encodePacked(_data));
+        isValidSignature(msgHash, _signature);
+        return ERC1271_ISVALIDSIGNATURE_BYTES;
+    }
+
+    function isValidSignature(bytes32 _msgHash, bytes memory _signature) public view returns (bytes4) {
+        require(_signature.length == 65, "invalid signature length");
+		checkKeyStatus(msg.sender, DAPP_KEY_INDEX);
+		address signingKey = accountStorage.getKeyData(msg.sender, DAPP_KEY_INDEX);
+		bytes32 prefixedHash = keccak256(abi.encodePacked(SIGN_HASH_PREFIX, _msgHash));
+		verifySig(signingKey, _signature, prefixedHash);
+        return ERC1271_ISVALIDSIGNATURE_BYTES32;
+    }
 
 	// *************** internal functions ********************** //
 
