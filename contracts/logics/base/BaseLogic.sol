@@ -144,7 +144,7 @@ contract BaseLogic {
         }
     }
 
-    function checkKeyStatus(address _account, uint256 _index) internal {
+    function checkKeyStatus(address _account, uint256 _index) internal view {
         // check operation key status
         if (_index > 0) {
             require(accountStorage.getKeyStatus(_account, _index) != 1, "frozen key");

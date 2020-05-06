@@ -123,3 +123,23 @@ Description: implement logic of transferring asset
 Description: implement logic of interacting with external contracts  
 `function callContract()`: call external contract  
 `function callMultiContract()`: call multiple external contracts atomically  
+
+
+
+# Install
+yarn install
+
+# Compile
+truffle build
+
+# test
+1. shorten delay time in `AccountBaseLogic.sol` to 2 seconds before running test files
+```
+uint256 constant internal DELAY_CHANGE_ADMIN_KEY = 2 seconds;//21 days
+uint256 constant internal DELAY_CHANGE_OPERATION_KEY = 2 seconds;//7 days
+uint256 constant internal DELAY_UNFREEZE_KEY = 2 seconds;//7 days
+uint256 constant internal DELAY_CHANGE_BACKUP = 2 seconds;//21 days
+uint256 constant internal DELAY_CHANGE_ADMIN_KEY_BY_BACKUP = 2 seconds;//30 days
+```
+
+2. truffle test

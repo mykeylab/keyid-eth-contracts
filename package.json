@@ -1,0 +1,28 @@
+{
+  "name": "keyid-eth-contracts",
+  "version": "1.0.0",
+  "description": "MYKEY is a decentralized smart wallet, which means MYKEY account is a smart contract, rather than an EOA address. This highly improves security and usability.   MYKEY has 3 main characteristics:   - **Separated permissions**. Various action permissions(like transferring asset, account management, etc.) are owned by separated multiple keys.   - **Recoverable account**. All keys of MYKEY account are replaceable. In extreme cases when all keys are lost, one can still recover his/her account with the assist of emergency contacts.   - **Meta-transaction**. MYKEY users don't need to care about gas price or gas limit. All transactions are delivered by \"postman\" accounts with meta-transaction mechanism.",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "openzeppelin-solidity": "^2.3.0",
+    "bn.js": "^4.11.6",
+    "rlp": "^2.2.4"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mykeylab/keyid-eth-contracts.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mykeylab/keyid-eth-contracts/issues"
+  },
+  "homepage": "https://github.com/mykeylab/keyid-eth-contracts#readme"
+}
