@@ -132,7 +132,7 @@ yarn install
 # Compile
 truffle build
 
-# test
+# Test
 1. shorten delay time in `AccountBaseLogic.sol` to 2 seconds before running test files
 ```
 uint256 constant internal DELAY_CHANGE_ADMIN_KEY = 2 seconds;//21 days
