@@ -7,8 +7,9 @@
     "test": "test"
   },
   "dependencies": {
-    "openzeppelin-solidity": "^2.3.0",
     "bn.js": "^4.11.6",
+    "minimist": "^1.2.5",
+    "openzeppelin-solidity": "^2.3.0",
     "rlp": "^2.2.4"
   },
   "devDependencies": {},
