@@ -81,7 +81,6 @@ contract("AccountLogic", accounts => {
 		var salt = web3.utils.soliditySha3("a");
 
 		await accountCreator.addOwner(account0);
-		await accountCreator.setAddresses(logicManager.address, accountStorage.address, baseAccountImp.address);
 		var ret = await accountCreator.createCounterfactualAccount(keys,bkps,salt);
 		var wallet = ret.logs[0].args.wallet;
 		var walletGot = await accountCreator.getCounterfactualAccountAddress(keys,bkps,salt);

@@ -21,13 +21,12 @@ module.exports =  async function(deployer) {
         await deployer.deploy(DualsigsLogic, AccountStorage.address);
 
         await deployer.deploy(DappLogic, AccountStorage.address);
+
+        await deployer.deploy(Account);
         
         await deployer.deploy(LogicManager, [AccountLogic.address, TransferLogic.address, DualsigsLogic.address, DappLogic.address], 4).then(()=>{
-            deployer.deploy(AccountCreator);
+            deployer.deploy(AccountCreator, LogicManager.address, AccountStorage.address, Account.address);
         });
-
-        await deployer.deploy(Account)
-
 
         console.log(`AccountLogic ${AccountLogic.address}, TransferLogic ${TransferLogic.address}, 
                     DualsigsLogic ${DualsigsLogic.address}, DappLogic ${DappLogic.address}, 

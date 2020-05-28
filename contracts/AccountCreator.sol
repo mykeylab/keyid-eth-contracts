@@ -12,8 +12,14 @@ contract AccountCreator is MultiOwned {
 
     // *************** Events *************************** //
     event AccountCreated(address indexed wallet, address[] keys, address[] backups);
-    event AddressesSet(address mgr, address strg, address impl);
-    event Closed(address indexed sender);
+    event AddressesSet(address mgr, address strg);
+
+    // *************** Constructor ********************** //
+    constructor(address _mgr, address _storage, address _accountImpl) public {
+        logicManager = _mgr;
+        accountStorage = _storage;
+        accountImpl = _accountImpl;
+    }
 
     // *************** Internal Functions ********************* //
 
@@ -58,17 +64,9 @@ contract AccountCreator is MultiOwned {
         return account;
     }
 
-    function setAddresses(address _mgr, address _storage, address _accountImpl) external onlyMultiOwners {
+    function setAddresses(address _mgr, address _storage) external onlyMultiOwners {
         logicManager = _mgr;
         accountStorage = _storage;
-        accountImpl = _accountImpl;
-        emit AddressesSet(_mgr, _storage, _accountImpl);
-    }
-
-    // *************** Suicide ********************* //
-    
-    function close() external onlyMultiOwners {
-        selfdestruct(msg.sender);
-        emit Closed(msg.sender);
+        emit AddressesSet(_mgr, _storage);
     }
 }
