@@ -23,8 +23,7 @@ module.exports =  async function(deployer) {
         await deployer.deploy(DappLogic, AccountStorage.address);
         
         await deployer.deploy(LogicManager, [AccountLogic.address, TransferLogic.address, DualsigsLogic.address, DappLogic.address], 4).then(()=>{
-            //In test cases, AccountCreator is not necessary. Account can be created by 'new()'
-            //deployer.deploy(AccountCreator, AccountStorage.address, LogicManager.address);
+            deployer.deploy(AccountCreator);
         });
 
         await deployer.deploy(Account)
