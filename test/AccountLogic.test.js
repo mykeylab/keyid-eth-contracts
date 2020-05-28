@@ -29,6 +29,7 @@ contract("AccountLogic", accounts => {
 		accountLogic = await AccountLogic.deployed();
 		logicManager = await LogicManager.deployed();
 		baseAccountImp = await BaseAccount.deployed();
+		accountCreator = await AccountCreator.deployed();
 
 		baseAccountProxy = await BaseAccountProxy.new(baseAccountImp.address); 
 
@@ -74,6 +75,20 @@ contract("AccountLogic", accounts => {
 		assert.equal(pk1, keys[1], "account created with incorrect pubkey address 1.");
 	});
 
+	it('create account by create2', async () => {
+		var keys = [account2,account3];
+		var bkps = [baseAccount.address];
+		var salt = web3.utils.soliditySha3("a");
+
+		await accountCreator.addOwner(account0);
+		await accountCreator.setAddresses(logicManager.address, accountStorage.address, baseAccountImp.address);
+		var ret = await accountCreator.createCounterfactualAccount(keys,bkps,salt);
+		var wallet = ret.logs[0].args.wallet;
+		var walletGot = await accountCreator.getCounterfactualAccountAddress(keys,bkps,salt);
+		// console.log("accountAddr:",wallet, walletGot);
+
+		assert.equal(wallet, walletGot, "create2 wallet address mismatch.");
+	});
 
 	it('change admin key', async () => {
 
