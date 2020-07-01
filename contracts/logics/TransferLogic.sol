@@ -59,7 +59,6 @@ contract TransferLogic is BaseLogic {
     // called from 'enter'
     // signer is '_from'
     function transferEth(address payable _from, address _to, uint256 _amount) external allowSelfCallsOnly {
-        // Account(_from).invoke(_to, _amount, "");
         // solium-disable-next-line security/no-low-level-calls
         (bool success,) = _from.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _to, _amount, ""));
         require(success, "calling invoke failed");
@@ -69,7 +68,6 @@ contract TransferLogic is BaseLogic {
     // signer is '_from'
     function transferErc20(address payable _from, address _to, address _token, uint256 _amount) external allowSelfCallsOnly {
         bytes memory methodData = abi.encodeWithSignature("transfer(address,uint256)", _to, _amount);
-        // bytes memory res = Account(_from).invoke(_token, 0, methodData);
         bool success;
         bytes memory res;
         // solium-disable-next-line security/no-low-level-calls
@@ -87,7 +85,6 @@ contract TransferLogic is BaseLogic {
     // make sure '_from' has approved allowance to '_approvedSpender'
     function transferApprovedErc20(address payable _approvedSpender, address _from, address _to, address _token, uint256 _amount) external allowSelfCallsOnly {
         bytes memory methodData = abi.encodeWithSignature("transferFrom(address,address,uint256)", _from, _to, _amount);
-        // bytes memory res = Account(_approvedSpender).invoke(_token, 0, methodData);
         bool success;
         bytes memory res;
         // solium-disable-next-line security/no-low-level-calls
@@ -113,7 +110,6 @@ contract TransferLogic is BaseLogic {
         } else {
             methodData = abi.encodeWithSignature("transferFrom(address,address,uint256)", _from, _to, _tokenId);
         }
-        // Account(_from).invoke(_nftContract, 0, methodData);
         bool success;
         // solium-disable-next-line security/no-low-level-calls
         (success,) = _from.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _nftContract, 0, methodData));

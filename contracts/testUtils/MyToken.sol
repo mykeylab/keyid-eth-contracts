@@ -1,6 +1,5 @@
 pragma solidity ^0.5.0;
 
-// import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 
 contract MyToken is ERC20Mintable {
@@ -9,11 +8,10 @@ contract MyToken is ERC20Mintable {
     uint8 private _decimals;
 	uint256 public val;
 
-	constructor(string memory name, string memory symbol, uint8 decimals/*, address account, uint256 amount*/) public {
+	constructor(string memory name, string memory symbol, uint8 decimals) public {
         _name = name;
         _symbol = symbol;
         _decimals = decimals;
-        // mint(account, amount);
 	}
 
     /**

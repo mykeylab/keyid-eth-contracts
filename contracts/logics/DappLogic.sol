@@ -56,7 +56,6 @@ contract DappLogic is BaseLogic {
     // called from 'enter'
     // call other contract from base account
     function callContract(address payable _account, address payable _target, uint256 _value, bytes calldata _methodData) external allowSelfCallsOnly {
-        // Account(_account).invoke(_target, _value, _methodData);
         bool success;
         // solium-disable-next-line security/no-low-level-calls
         (success,) = _account.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _target, _value, _methodData));
