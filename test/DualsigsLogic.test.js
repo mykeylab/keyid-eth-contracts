@@ -7,10 +7,12 @@ const BaseAccount = artifacts.require("Account");
 const AccountCreator = artifacts.require("AccountCreator");
 const BaseAccountProxy = artifacts.require("AccountProxy");
 const DualsigsLogic = artifacts.require("DualsigsLogic");
+const ProposalLogic = artifacts.require("ProposalLogic");
 
 let accountStorage;
 let accountLogic;
 let dualsigsLogic;
+let proposalLogic;
 let logicManager;
 let baseAccount;
 let baseAccount1;
@@ -34,6 +36,7 @@ contract("DualsigsLogic", accounts => {
 		accountStorage = await AccountStorage.deployed();
 		accountLogic = await AccountLogic.deployed();
 		dualsigsLogic = await DualsigsLogic.deployed();
+		proposalLogic = await ProposalLogic.deployed();
 		logicManager = await LogicManager.deployed();
 		baseAccountImp = await BaseAccount.deployed();
 
@@ -310,7 +313,7 @@ contract("DualsigsLogic", accounts => {
 						}]
 					}, [client, account1]);
 
-		await dualsigsLogic.executeProposal(client, client, fData);
+		await proposalLogic.executeProposal(client, client, fData);
 
         let adminNew = await accountStorage.getKeyData(client, 0);
 		assert.equal(adminNew, account1, "execute proposal failed.");

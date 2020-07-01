@@ -3,12 +3,14 @@ const assert = require('assert');
 const AccountStorage = artifacts.require("AccountStorage");
 const LogicManager = artifacts.require("LogicManager");
 const AccountLogic = artifacts.require("AccountLogic");
+const CommonStaticLogic = artifacts.require("CommonStaticLogic");
 const BaseAccount = artifacts.require("Account");
 const BaseAccountProxy = artifacts.require("AccountProxy");
 const AccountCreator = artifacts.require("AccountCreator");
 
 let accountStorage;
 let accountLogic;
+let commonStaticLogic;
 let logicManager;
 let baseAccount;
 let mgrOwner;
@@ -27,6 +29,7 @@ contract("AccountLogic", accounts => {
 	
 		accountStorage = await AccountStorage.deployed();
 		accountLogic = await AccountLogic.deployed();
+		commonStaticLogic= await CommonStaticLogic.deployed();
 		logicManager = await LogicManager.deployed();
 		baseAccountImp = await BaseAccount.deployed();
 		accountCreator = await AccountCreator.deployed();
@@ -37,7 +40,7 @@ contract("AccountLogic", accounts => {
 
 		// console.log(`baseAccount ${baseAccount.address}, baseAccountImp.address ${baseAccountImp.address}  `);
 
-		await baseAccount.init(logicManager.address, accountStorage.address, [accountLogic.address], [account1, account2, account3, account3], []);
+		await baseAccount.init(logicManager.address, accountStorage.address, [accountLogic.address, commonStaticLogic.address], [account1, account2, account3, account3], []);
 
 		mgrOwner = await logicManager.owner();
 	
@@ -66,7 +69,7 @@ contract("AccountLogic", accounts => {
 		let baseAccountProxy2 = await BaseAccountProxy.new(baseAccountImp.address); 
 		let baseAccount2 = await BaseAccount.at(baseAccountProxy2.address)
 
-		let logics = [accountLogic.address]
+		let logics = [accountLogic.address, commonStaticLogic.address]
 		await baseAccount2.init(logicManager.address, accountStorage.address, logics, keys, [baseAccount.address])
 
 		var pk0 = await accountStorage.getKeyData(baseAccount2.address, 0);
@@ -249,7 +252,7 @@ contract("AccountLogic", accounts => {
 	});
 
 	//ERC1271 test
-	it('is valid signature', async () => {
+    it('should support EIP1271 isValidSignature()', async () => {
 		var pk3 = await accountStorage.getKeyData(baseAccount.address, 3);
 		let signingKey = pk3;
 

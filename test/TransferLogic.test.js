@@ -3,6 +3,7 @@ const assert = require('assert');
 const AccountStorage = artifacts.require("AccountStorage");
 const LogicManager = artifacts.require("LogicManager");
 const TransferLogic = artifacts.require("TransferLogic");
+const CommonStaticLogic = artifacts.require("CommonStaticLogic");
 const BaseAccount = artifacts.require("Account");
 const MyToken = artifacts.require("MyToken");
 const MyNft = artifacts.require("MyNft");
@@ -11,6 +12,7 @@ const BaseAccountProxy = artifacts.require("AccountProxy");
 let accountStorage;
 let accountLogic;
 let transferLogic;
+let commonStaticLogic;
 let logicManager;
 let baseAccountProxy;
 let baseAccountProxy2;
@@ -30,7 +32,8 @@ contract("TransferLogic", accounts => {
 		account3 = accounts[3];
 		
 		accountStorage = await AccountStorage.deployed();
-		transferLogic = await TransferLogic.deployed();
+        transferLogic = await TransferLogic.deployed();
+        commonStaticLogic= await CommonStaticLogic.deployed(); 
 		logicManager = await LogicManager.deployed();
 		myToken = await MyToken.deployed();
 		myNft = await MyNft.deployed();
@@ -39,7 +42,7 @@ contract("TransferLogic", accounts => {
 		baseAccountProxy = await BaseAccountProxy.new(baseAccountImp.address); 
 		baseAccount = await BaseAccount.at(baseAccountProxy.address)
 
-		await baseAccount.init(logicManager.address, accountStorage.address, [transferLogic.address], [account1, account2], [])
+		await baseAccount.init(logicManager.address, accountStorage.address, [transferLogic.address, commonStaticLogic.address], [account1, account2], [])
 
 	    await myToken.mint(baseAccount.address, 10000);
 		await myToken.mint(account3, 10000);
@@ -75,7 +78,7 @@ contract("TransferLogic", accounts => {
 
 		baseAccountProxy2 = await BaseAccountProxy.new(baseAccountImp.address); 
 		baseAccount2 = await BaseAccount.at(baseAccountProxy2.address)
-		await baseAccount2.init(logicManager.address, accountStorage.address, [transferLogic.address], keys, [])
+		await baseAccount2.init(logicManager.address, accountStorage.address, [transferLogic.address, commonStaticLogic.address], keys, [])
 
 		var pk0 = await accountStorage.getKeyData(baseAccount2.address, 0);
 		var pk1 = await accountStorage.getKeyData(baseAccount2.address, 1);

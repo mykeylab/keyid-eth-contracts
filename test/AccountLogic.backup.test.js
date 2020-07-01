@@ -6,10 +6,11 @@ const AccountLogic = artifacts.require("AccountLogic");
 const BaseAccount = artifacts.require("Account");
 const AccountCreator = artifacts.require("AccountCreator");
 const BaseAccountProxy = artifacts.require("AccountProxy");
+const ProposalLogic = artifacts.require("ProposalLogic");
 
 let accountStorage;
 let accountLogic;
-let dualsigsLogic;
+let proposalLogic;
 let logicManager;
 let baseAccount;
 let baseAccount2;
@@ -30,6 +31,7 @@ contract("AccountLogic backup and proposal", accounts => {
 	
 		accountStorage = await AccountStorage.deployed();
 		accountLogic = await AccountLogic.deployed();
+        proposalLogic = await ProposalLogic.deployed();
 		logicManager = await LogicManager.deployed();
 		baseAccountImp = await BaseAccount.deployed();
 
@@ -186,10 +188,10 @@ contract("AccountLogic backup and proposal", accounts => {
 						}]
 					}, [client, account3]);
 
-		await accountLogic.executeProposal(client, proposeBackup,fData);
+		await proposalLogic.executeProposal(client, proposeBackup,fData);
 
 		await sleep(2000);
-		await accountLogic.triggerChangeAdminKeyByBackup(client, account3);
+		await proposalLogic.triggerChangeAdminKeyByBackup(client, account3);
 
         let adminNew = await accountStorage.getKeyData(client, 0);
 		assert.equal(adminNew, account3, "execute proposal failed.");
