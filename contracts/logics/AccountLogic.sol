@@ -7,15 +7,6 @@ import "./base/AccountBaseLogic.sol";
 */
 contract AccountLogic is AccountBaseLogic {
 
-    /*
-    index 0: admin key
-          1: asset(transfer)
-          2: adding
-          3: reserved(dapp)
-          4: assist
-     */
-    uint constant internal DAPP_KEY_INDEX = 3;
-
 	// Equals to bytes4(keccak256("addOperationKey(address,address)"))
 	bytes4 private constant ADD_OPERATION_KEY = 0x9a7f6101;
 	// Equals to bytes4(keccak256("proposeAsBackup(address,address,bytes)"))
@@ -23,20 +14,14 @@ contract AccountLogic is AccountBaseLogic {
 	// Equals to bytes4(keccak256("approveProposal(address,address,address,bytes)"))
 	bytes4 private constant APPROVE_PROPOSAL = 0x3713f742;
 
-    //0x20c13b0b
-    bytes4 private constant ERC1271_ISVALIDSIGNATURE_BYTES = bytes4(keccak256("isValidSignature(bytes,bytes)"));
-	//0x1626ba7e
-    bytes4 private constant ERC1271_ISVALIDSIGNATURE_BYTES32 = bytes4(keccak256("isValidSignature(bytes32,bytes)"));
 
     event AccountLogicEntered(bytes data, uint256 indexed nonce);
 	event AccountLogicInitialised(address indexed account);
 	event ChangeAdminKeyTriggered(address indexed account, address pkNew);
-	event ChangeAdminKeyByBackupTriggered(address indexed account, address pkNew);
 	event ChangeAllOperationKeysTriggered(address indexed account, address[] pks);
 	event UnfreezeTriggered(address indexed account);
 
 	event ChangeAdminKey(address indexed account, address indexed pkNew);
-	event ChangeAdminKeyByBackup(address indexed account, address indexed pkNew);
 	event AddOperationKey(address indexed account, address indexed pkNew);
 	event ChangeAllOperationKeys(address indexed account, address[] pks);
 	event Freeze(address indexed account);
@@ -60,8 +45,6 @@ contract AccountLogic is AccountBaseLogic {
     // *************** Initialization ********************* //
 
 	function initAccount(Account _account) external allowAccountCallsOnly(_account){
-		_account.enableStaticCall(address(this), ERC1271_ISVALIDSIGNATURE_BYTES);
-		_account.enableStaticCall(address(this), ERC1271_ISVALIDSIGNATURE_BYTES32);
         emit AccountLogicInitialised(address(_account));
     }
 
@@ -73,7 +56,6 @@ contract AccountLogic is AccountBaseLogic {
 		proposeAsBackup, approveProposal, cancelProposal
 	*/
 	function enter(bytes calldata _data, bytes calldata _signature, uint256 _nonce) external {
-		require(getMethodId(_data) != CHANGE_ADMIN_KEY_BY_BACKUP, "invalid data");
 		address account = getSignerAddress(_data);
 		uint256 keyIndex = getKeyIndex(_data);
 		checkKeyStatus(account, keyIndex);
@@ -115,35 +97,6 @@ contract AccountLogic is AccountBaseLogic {
 		accountStorage.clearDelayData(_account, CHANGE_ADMIN_KEY_BY_BACKUP);
 		clearRelatedProposalAfterAdminKeyChanged(_account);
 		emit ChangeAdminKeyTriggered(_account, _pkNew);
-	}
-
-	// *************** change admin key by backup proposal ********************** //
-
-    // called from 'executeProposal'
-	function changeAdminKeyByBackup(address payable _account, address _pkNew) external allowSelfCallsOnly {
-		require(_pkNew != address(0), "0x0 is invalid");
-		address pk = accountStorage.getKeyData(_account, 0);
-		require(pk != _pkNew, "identical admin key exists");
-		require(accountStorage.getDelayDataHash(_account, CHANGE_ADMIN_KEY_BY_BACKUP) == 0, "delay data already exists");
-		bytes32 hash = keccak256(abi.encodePacked('changeAdminKeyByBackup', _account, _pkNew));
-		accountStorage.setDelayData(_account, CHANGE_ADMIN_KEY_BY_BACKUP, hash, now + DELAY_CHANGE_ADMIN_KEY_BY_BACKUP);
-		emit ChangeAdminKeyByBackup(_account, _pkNew);
-	}
-
-    // called from external
-	function triggerChangeAdminKeyByBackup(address payable _account, address _pkNew) external {
-		bytes32 hash = keccak256(abi.encodePacked('changeAdminKeyByBackup', _account, _pkNew));
-		require(hash == accountStorage.getDelayDataHash(_account, CHANGE_ADMIN_KEY_BY_BACKUP), "delay hash unmatch");
-
-		uint256 due = accountStorage.getDelayDataDueTime(_account, CHANGE_ADMIN_KEY_BY_BACKUP);
-		require(due > 0, "delay data not found");
-		require(due <= now, "too early to trigger changeAdminKeyByBackup");
-		accountStorage.setKeyData(_account, 0, _pkNew);
-		//clear any existing related delay data and proposal
-		accountStorage.clearDelayData(_account, CHANGE_ADMIN_KEY_BY_BACKUP);
-		accountStorage.clearDelayData(_account, CHANGE_ADMIN_KEY);
-		clearRelatedProposalAfterAdminKeyChanged(_account);
-		emit ChangeAdminKeyByBackupTriggered(_account, _pkNew);
 	}
 
 	// *************** add operation key ********************** //
@@ -292,11 +245,13 @@ contract AccountLogic is AccountBaseLogic {
 		emit CancelRemoveBackup(_account, _backup);
 	}
 
-	// *************** propose, approve and cancel proposal ********************** //
+	// *************** propose a proposal by one of the backups ********************** //
 
     // called from 'enter'
 	// proposer is backup in the case of 'proposeAsBackup'
 	function proposeAsBackup(address _backup, address payable _client, bytes calldata _functionData) external allowSelfCallsOnly {
+		require(getSignerAddress(_functionData) == _client, "invalid _client");
+
 		bytes4 proposedActionId = getMethodId(_functionData);
 		require(proposedActionId == CHANGE_ADMIN_KEY_BY_BACKUP, "invalid proposal by backup");
 		checkRelation(_client, _backup);
@@ -305,11 +260,19 @@ contract AccountLogic is AccountBaseLogic {
 		emit ProposeAsBackup(_backup, _client, _functionData);
 	}
 
+	// *************** approve/cancel proposal ********************** //
+
     // called from 'enter'
 	function approveProposal(address _backup, address payable _client, address _proposer, bytes calldata _functionData) external allowSelfCallsOnly {
+		require(getSignerAddress(_functionData) == _client, "invalid _client");
+
 		bytes32 functionHash = keccak256(_functionData);
 		require(functionHash != 0, "invalid hash");
 		checkRelation(_client, _backup);
+		if (_proposer != _client) {
+			checkRelation(_client, _proposer);
+		}
+
 		bytes4 proposedActionId = getMethodId(_functionData);
 		bytes32 hash = accountStorage.getProposalDataHash(_client, _proposer, proposedActionId);
 		require(hash == functionHash, "proposal unmatch");
@@ -323,28 +286,6 @@ contract AccountLogic is AccountBaseLogic {
 		accountStorage.clearProposalData(_client, _proposer, _proposedActionId);
 		emit CancelProposal(_client, _proposer, _proposedActionId);
 	}
-
-	// *************** Implementation of EIP1271 ********************** //
-
-    /**
-    * @dev Should return whether the signature provided is valid for the provided data.
-    * @param _data Arbitrary length data signed on the behalf of address(this)
-    * @param _signature Signature byte array associated with _data
-    */
-    function isValidSignature(bytes calldata _data, bytes calldata _signature) external view returns (bytes4) {
-        bytes32 msgHash = keccak256(abi.encodePacked(_data));
-        isValidSignature(msgHash, _signature);
-        return ERC1271_ISVALIDSIGNATURE_BYTES;
-    }
-
-    function isValidSignature(bytes32 _msgHash, bytes memory _signature) public view returns (bytes4) {
-        require(_signature.length == 65, "invalid signature length");
-		checkKeyStatus(msg.sender, DAPP_KEY_INDEX);
-		address signingKey = accountStorage.getKeyData(msg.sender, DAPP_KEY_INDEX);
-		bytes32 prefixedHash = keccak256(abi.encodePacked(SIGN_HASH_PREFIX, _msgHash));
-		verifySig(signingKey, _signature, prefixedHash);
-        return ERC1271_ISVALIDSIGNATURE_BYTES32;
-    }
 
 	// *************** internal functions ********************** //
 

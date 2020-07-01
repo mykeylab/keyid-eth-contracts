@@ -13,8 +13,6 @@ contract TransferLogic is BaseLogic {
      */
     uint constant internal TRANSFER_KEY_INDEX = 1;
 
-    // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
     // *************** Events *************************** //
 
@@ -33,7 +31,6 @@ contract TransferLogic is BaseLogic {
 
     // enable staic call 'onERC721Received' from base account
     function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        _account.enableStaticCall(address(this), ERC721_RECEIVED);
         emit TransferLogicInitialised(address(_account));
     }
 
@@ -130,17 +127,12 @@ contract TransferLogic is BaseLogic {
         } else {
             methodData = abi.encodeWithSignature("transferFrom(address,address,uint256)", _from, _to, _tokenId);
         }
-        // Account(_approvedSpender).invoke(_nftContract, 0, methodData);
         bool success;
         // solium-disable-next-line security/no-low-level-calls
         (success,) = _approvedSpender.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _nftContract, 0, methodData));
         require(success, "calling invoke failed");
     }
 
-    // *************** callback of safeTransferFrom ********************* //
 
-    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes calldata _data) external pure returns (bytes4) {
-        return ERC721_RECEIVED;
-    }
 }
 
