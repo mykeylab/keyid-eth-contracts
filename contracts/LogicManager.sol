@@ -9,8 +9,8 @@ contract LogicManager is Owned {
     event UpdateLogicDone(address indexed logic, bool value);
 
     struct pending {
-        bool value;
-        uint dueTime;
+        bool value; //True: enable a new logic; False: disable an old logic.
+        uint dueTime; //due time of a pending logic
     }
 
     // The authorized logic modules
@@ -29,11 +29,10 @@ contract LogicManager is Owned {
     // updated logics and their due time of becoming effective
     mapping (address => pending) public pendingLogics;
 
-    // pending time before updated logics take effect
     struct pendingTime {
-        uint curPendingTime;
-        uint nextPendingTime;
-        uint dueTime;
+        uint curPendingTime; //current pending time
+        uint nextPendingTime; //new pending time
+        uint dueTime; //due time of new pending time
     }
 
     pendingTime public pt;
@@ -55,24 +54,42 @@ contract LogicManager is Owned {
         pt.dueTime = now;
     }
 
+    /**
+     * @dev Submit a new pending time. Called only by owner.
+     * @param _pendingTime The new pending time.
+     */
     function submitUpdatePendingTime(uint _pendingTime) external onlyOwner {
         pt.nextPendingTime = _pendingTime;
         pt.dueTime = pt.curPendingTime + now;
     }
 
+    /**
+     * @dev Trigger updating pending time.
+     */
     function triggerUpdatePendingTime() external {
         require(pt.dueTime <= now, "too early to trigger updatePendingTime");
         pt.curPendingTime = pt.nextPendingTime;
     }
 
+    /**
+     * @dev check if a logic contract is authorized.
+     */
     function isAuthorized(address _logic) external view returns (bool) {
         return authorized[_logic];
     }
 
+    /**
+     * @dev get the authorized logic array.
+     */
     function getAuthorizedLogics() external view returns (address[] memory) {
         return authorizedLogics;
     }
 
+    /**
+     * @dev Submit a new logic. Called only by owner.
+     * @param _logic The new logic contract address.
+     * @param _value True: enable a new logic; False: disable an old logic.
+     */
     function submitUpdate(address _logic, bool _value) external onlyOwner {
         pending storage p = pendingLogics[_logic];
         p.value = _value;
@@ -80,11 +97,18 @@ contract LogicManager is Owned {
         emit UpdateLogicSubmitted(_logic, _value);
     }
 
+    /**
+     * @dev Cancel a logic update. Called only by owner.
+     */
     function cancelUpdate(address _logic) external onlyOwner {
         delete pendingLogics[_logic];
         emit UpdateLogicCancelled(_logic);
     }
 
+    /**
+     * @dev Trigger updating a new logic.
+     * @param _logic The logic contract address.
+     */
     function triggerUpdateLogic(address _logic) external {
         pending memory p = pendingLogics[_logic];
         require(p.dueTime > 0, "pending logic not found");
@@ -93,6 +117,11 @@ contract LogicManager is Owned {
         delete pendingLogics[_logic];
     }
 
+    /**
+     * @dev To update an existing logic, for example authorizedLogics[1],
+     * first a new logic is added to the array end, then copied to authorizedLogics[1],
+     * then the last logic is dropped, done.
+     */
     function updateLogic(address _logic, bool _value) internal {
         if (authorized[_logic] != _value) {
             if(_value) {

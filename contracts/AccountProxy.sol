@@ -2,6 +2,7 @@ pragma solidity ^0.5.4;
 
 contract AccountProxy {
 
+    // address of Account template
     address implementation;
 
     event Received(uint indexed value, address indexed sender, bytes data);

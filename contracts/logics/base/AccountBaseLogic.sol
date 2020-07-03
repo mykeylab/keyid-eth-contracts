@@ -37,6 +37,9 @@ contract AccountBaseLogic is BaseLogic {
 
     // *************** Functions ********************** //
 
+    /**
+    * @dev Check if a certain account is another's backup.
+    */
     function checkRelation(address _client, address _backup) internal view {
         require(_backup != address(0), "backup cannot be 0x0");
         require(_client != address(0), "client cannot be 0x0");

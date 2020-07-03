@@ -191,6 +191,13 @@ contract AccountStorage {
 
 
     // *************** init ********************** //
+
+    /**
+     * @dev Write account data into storage.
+     * @param _account The Account.
+     * @param _keys The initial keys.
+     * @param _backups The initial backups.
+     */
     function initAccount(Account _account, address[] calldata _keys, address[] calldata _backups)
         external
         allowAccountCallsOnly(_account)

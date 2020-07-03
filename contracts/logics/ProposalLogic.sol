@@ -29,11 +29,17 @@ contract ProposalLogic is AccountBaseLogic {
 
     // *************** Proposal ********************** //
 
-    /* proposed actions called from 'executeProposal':
+    /**
+    * @dev Execute a proposal. No sig check is required.
+	* There are 4 proposed actions called from 'executeProposal':
          AccountLogic: changeAdminKeyByBackup
          DualsigsLogic: changeAdminKeyWithoutDelay, changeAllOperationKeysWithoutDelay, unfreezeWithoutDelay
+    * @param _client client address
+    * @param _proposer If 'proposeAsBackup', proposer is backup; if 'proposeByBoth', proposer is client.
+	* @param _functionData The proposed action data.
     */
     function executeProposal(address payable _client, address _proposer, bytes calldata _functionData) external {
+        //make sure the proposed action data is client's
         require(getSignerAddress(_functionData) == _client, "invalid _client");
         
         bytes4 proposedActionId = getMethodId(_functionData);
@@ -58,6 +64,13 @@ contract ProposalLogic is AccountBaseLogic {
                 actionId == UNFREEZE_WITHOUT_DELAY, "invalid proposed action");
     }
 
+    /**
+    * @dev Check if a proposal is approved by majority.
+    * @param _client client address
+    * @param _proposer If 'proposeAsBackup', proposer is backup; if 'proposeByBoth', proposer is client.
+    * @param _proposedActionId The Proposed action method id.
+	* @param _functionHash The proposed action data.
+    */
     function checkApproval(address _client, address _proposer, bytes4 _proposedActionId, bytes32 _functionHash) internal view {
         if (_proposer != _client) {
 			checkRelation(_client, _proposer);
@@ -95,6 +108,7 @@ contract ProposalLogic is AccountBaseLogic {
 	// *************** change admin key by backup ********************** //
 
     // called from 'executeProposal'
+    // changing admin key by backup's proposal requires 30 days delay
 	function changeAdminKeyByBackup(address payable _account, address _pkNew) external allowSelfCallsOnly {
 		require(_pkNew != address(0), "0x0 is invalid");
 		address pk = accountStorage.getKeyData(_account, 0);

@@ -50,11 +50,13 @@ contract AccountLogic is AccountBaseLogic {
 
 	// *************** action entry ********************** //
 
-    /* AccountLogic has 12 actions called from 'enter':
+    /**
+    * @dev Entry method of AccountLogic.
+    * AccountLogic has 12 actions called from 'enter':
         changeAdminKey, addOperationKey, changeAllOperationKeys, freeze, unfreeze,
 		removeBackup, cancelDelay, cancelAddBackup, cancelRemoveBackup,
 		proposeAsBackup, approveProposal, cancelProposal
-	*/
+    */
 	function enter(bytes calldata _data, bytes calldata _signature, uint256 _nonce) external {
 		address account = getSignerAddress(_data);
 		uint256 keyIndex = getKeyIndex(_data);
@@ -247,8 +249,13 @@ contract AccountLogic is AccountBaseLogic {
 
 	// *************** propose a proposal by one of the backups ********************** //
 
-    // called from 'enter'
-	// proposer is backup in the case of 'proposeAsBackup'
+    /**
+    * @dev Propose a proposal. The proposer is one of client's backups.
+	* called from 'enter'. _backup's sig is checked in 'enter'.
+    * @param _backup backup address
+    * @param _client client address
+	* @param _functionData The proposed action data.
+    */
 	function proposeAsBackup(address _backup, address payable _client, bytes calldata _functionData) external allowSelfCallsOnly {
 		require(getSignerAddress(_functionData) == _client, "invalid _client");
 
@@ -262,7 +269,14 @@ contract AccountLogic is AccountBaseLogic {
 
 	// *************** approve/cancel proposal ********************** //
 
-    // called from 'enter'
+    /**
+    * @dev Approve a proposal.
+	* called from 'enter'. _backup's sig is checked in 'enter'.
+    * @param _backup backup address
+    * @param _client client address
+	* @param _proposer If 'proposeAsBackup', proposer is backup; if 'proposeByBoth', proposer is client.
+	* @param _functionData The proposed action data.
+    */
 	function approveProposal(address _backup, address payable _client, address _proposer, bytes calldata _functionData) external allowSelfCallsOnly {
 		require(getSignerAddress(_functionData) == _client, "invalid _client");
 

@@ -23,6 +23,12 @@ contract AccountCreator is MultiOwned {
 
     // *************** Internal Functions ********************* //
 
+    /**
+     * @dev Initialize an account.
+     * @param _accountProxy The account address.
+     * @param _keys The initial keys.
+     * @param _backups The initial backups.
+     */
     function initializeAccount(address payable _accountProxy, address[] memory _keys, address[] memory _backups) internal {
         Account(_accountProxy).init(logicManager, accountStorage, LogicManager(logicManager).getAuthorizedLogics(), _keys, _backups);
         emit AccountCreated(_accountProxy, _keys, _backups);
@@ -30,6 +36,11 @@ contract AccountCreator is MultiOwned {
 
     // *************** External Functions ********************* //
 
+    /**
+     * @dev Method to create an account. Called only by owners.
+     * @param _keys The initial keys.
+     * @param _backups The initial backups.
+     */
     function createAccount(address[] calldata _keys, address[] calldata _backups) external onlyMultiOwners {
         AccountProxy accountProxy = new AccountProxy(accountImpl);
         initializeAccount(address(accountProxy), _keys, _backups);
@@ -64,6 +75,11 @@ contract AccountCreator is MultiOwned {
         return account;
     }
 
+    /**
+     * @dev Change logicManager and accountStorage. Called only by owners.
+     * @param _mgr The new logic manager.
+     * @param _storage The new account storage.
+     */
     function setAddresses(address _mgr, address _storage) external onlyMultiOwners {
         logicManager = _mgr;
         accountStorage = _storage;

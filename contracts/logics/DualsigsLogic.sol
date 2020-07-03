@@ -33,9 +33,11 @@ contract DualsigsLogic is AccountBaseLogic {
 
 	// *************** action entry ********************** //
 
-    /* DualsigsLogic has 2 actions called from 'enter':
+    /**
+    * @dev Entry method of DualsigsLogic.
+    * DualsigsLogic has 2 actions called from 'enter':
         addBackup, proposeByBoth
-	*/
+    */
 	function enter(
 		bytes calldata _data, bytes calldata _clientSig, bytes calldata _backupSig, uint256 _clientNonce, uint256 _backupNonce
 	)
@@ -88,7 +90,7 @@ contract DualsigsLogic is AccountBaseLogic {
 	}
 
     // return backupData index(0~5), 6 means not found
-    // 'available' means empty or expired
+    // 'available' means an empty slot or an expired backup
 	function findAvailableSlot(address _account, address _backup) public view returns(uint) {
 		uint index = MAX_DEFINED_BACKUP_INDEX + 1;
 		if (_backup == address(0)) {
@@ -113,8 +115,13 @@ contract DualsigsLogic is AccountBaseLogic {
 
 	// *************** propose a proposal by both client and backup ********************** //
 
-    // called from 'enter'
-	// proposer is client in the case of 'proposeByBoth'
+    /**
+    * @dev Propose a proposal. The proposer is client.
+	* called from 'enter'. Both _client's and _backup's sigs are checked in 'enter'.
+    * @param _client client address
+    * @param _backup backup address
+	* @param _functionData The proposed action data.
+    */
 	function proposeByBoth(address payable _client, address _backup, bytes calldata _functionData) external allowSelfCallsOnly {
 		require(getSignerAddress(_functionData) == _client, "invalid _client");
 		

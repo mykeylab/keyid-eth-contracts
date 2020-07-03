@@ -36,6 +36,11 @@ contract TransferLogic is BaseLogic {
 
     // *************** action entry ********************* //
 
+    /**
+    * @dev Entry method of TransferLogic.
+    * TransferLogic has 5 actions called from 'enter':
+        transferEth, transferErc20, transferApprovedErc20, transferNft, transferApprovedNft
+    */
     function enter(bytes calldata _data, bytes calldata _signature, uint256 _nonce) external {
         address account = getSignerAddress(_data);
         checkKeyStatus(account, TRANSFER_KEY_INDEX);

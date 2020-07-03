@@ -36,6 +36,11 @@ contract DappLogic is BaseLogic {
 
     // *************** action entry ********************* //
 
+    /**
+    * @dev Entry method of DappLogic.
+    * DappLogic has 2 actions called from 'enter':
+        callContract, callMultiContract
+    */
     function enter(bytes calldata _data, bytes calldata _signature, uint256 _nonce) external {
         address account = getSignerAddress(_data);
         checkKeyStatus(account, DAPP_KEY_INDEX);
@@ -64,7 +69,7 @@ contract DappLogic is BaseLogic {
 
     // called from 'enter'
     // call serveral other contracts at a time
-    // rlp encode _methodData array into rlpBytes
+    // 'bytes[]' not supported, therefore an array of _methodData is rlp encoded into rlpBytes
     function callMultiContract(address payable _account, address[] calldata _targets, uint256[] calldata _values, bytes calldata _rlpBytes) external allowSelfCallsOnly {
         RLPReader.RLPItem[] memory ls = _rlpBytes.toRlpItem().toList();
 

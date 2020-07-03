@@ -46,6 +46,12 @@ contract Account {
         emit AccountInit(address(this));
     }
 
+    /**
+    * @dev Account calls an external target contract.
+    * @param _target The target contract address.
+    * @param _value ETH value of the call.
+    * @param _data data of the call.
+    */
     function invoke(address _target, uint _value, bytes calldata _data)
         external
         allowAuthorizedLogicContractsCallsOnly
@@ -68,6 +74,11 @@ contract Account {
         emit EnabledStaticCall(_module, _method);
     }
 
+    /**
+    * @dev Reserved method to change account's manager. Normally it's unused.
+    * Calling this method requires adding a new authorized logic.
+    * @param _newMgr New logic manager.
+    */
     function changeManager(address _newMgr) external allowAuthorizedLogicContractsCallsOnly {
         require(_newMgr != address(0), "address cannot be null");
         require(_newMgr != manager, "already changed");
