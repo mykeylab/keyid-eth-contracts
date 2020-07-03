@@ -71,6 +71,7 @@ contract TransferLogic is BaseLogic {
         (success, res) = _from.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _token, 0, methodData));
         require(success, "calling invoke failed");
         if (res.length > 0) {
+            res = abi.decode(res, (bytes));
             bool r;
             r = abi.decode(res, (bool));
             require(r, "transferErc20 return false");
@@ -88,6 +89,7 @@ contract TransferLogic is BaseLogic {
         (success, res) = _approvedSpender.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _token, 0, methodData));
         require(success, "calling invoke failed");
         if (res.length > 0) {
+            res = abi.decode(res, (bytes));
             bool r;
             r = abi.decode(res, (bool));
             require(r, "transferFrom return false");
