@@ -1,6 +1,7 @@
 pragma solidity ^0.5.4;
 
 contract AccountProxy {
+    // CAUTION: inserting new field here will change slot0
 
     // address of Account template
     address implementation;

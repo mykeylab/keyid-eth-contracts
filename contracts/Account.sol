@@ -27,6 +27,9 @@ contract Account {
         _;
     }
 
+     /**
+     * @dev better to create and init account through AccountCreator.createAccount, which avoids race condition on Account.init
+     */
     function init(address _manager, address _accountStorage, address[] calldata _logics, address[] calldata _keys, address[] calldata _backups)
         external
     {

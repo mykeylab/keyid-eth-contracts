@@ -38,6 +38,8 @@ contract AccountCreator is MultiOwned {
 
     /**
      * @dev Method to create an account. Called only by owners.
+     * create and initialize account in one transaction
+     * This avoids race condition on Account.init
      * @param _keys The initial keys.
      * @param _backups The initial backups.
      */
