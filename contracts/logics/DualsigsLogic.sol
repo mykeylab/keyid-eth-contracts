@@ -164,16 +164,18 @@ contract DualsigsLogic is AccountBaseLogic {
 			7548cb94                                                            // method id
 			000000000000000000000000b7055946345ad40f8cca3feb075dfadd9e2641b5    // param 0
 			00000000000000000000000011390e32ccdfb3f85e92b949c72fe482d77838f3    // param 1
-			0000000000000000000000000000000000000000000000000000000000000060    // data length including padding
-			0000000000000000000000000000000000000000000000000000000000000044    // true data length
+			0000000000000000000000000000000000000000000000000000000000000060    // offset
+			0000000000000000000000000000000000000000000000000000000000000044    // data length
 			441d2e50                                                            // method id(proposed method: changeAdminKeyWithoutDelay)
 			000000000000000000000000b7055946345ad40f8cca3feb075dfadd9e2641b5    // param 0
 			00000000000000000000000013667a2711960c95fae074f90e0f739bc324d1ed    // param 1
 			00000000000000000000000000000000000000000000000000000000            // padding
 			*/
             // the first 32 bytes is the length of the bytes array _b
-			// 32 + 4 + 32 + 32 + 32 + 32 = 164
-            _a := mload(add(_b, 164))
+			// 32 + 4 + 32 = 68
+			// 32 + 4 + 32 + 32 = 100
+			// mload(add(_b, 100)) loads offset
+			_a := mload(add(add(_b, 68), mload(add(_b, 100))))
         }
     }
 
