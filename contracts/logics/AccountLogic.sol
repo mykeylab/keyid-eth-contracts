@@ -197,6 +197,13 @@ contract AccountLogic is AccountBaseLogic {
 		uint256 index = findBackup(_account, _backup);
 		require(index <= MAX_DEFINED_BACKUP_INDEX, "backup invalid or not exist");
 
+		uint256 expiryDate = accountStorage.getBackupExpiryDate(_account, index);
+		/*
+		 already expired: now > expiryDate;
+		 to be expired: now < expiryDate && expiryDate < uint256(-1)
+		 */
+		require(expiryDate == uint256(-1), "already expired or to be expired");
+
 		accountStorage.setBackupExpiryDate(_account, index, now + DELAY_CHANGE_BACKUP);
 		emit RemoveBackup(_account, _backup);
 	}
