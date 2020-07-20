@@ -55,7 +55,8 @@ contract AccountCreator is MultiOwned {
      * @param _salt The salt.
      */
     function createCounterfactualAccount(address[] calldata _keys, address[] calldata _backups, bytes32 _salt) external onlyMultiOwners {
-        bytes32 newSalt = keccak256(abi.encodePacked(_salt, _keys, _backups));
+        // better to use abi.encode to eliminate potential collision
+        bytes32 newSalt = keccak256(abi.encode(_salt, _keys, _backups));
         bytes memory code = abi.encodePacked(type(AccountProxy).creationCode, uint256(accountImpl));
         address payable accountProxy;
         // solium-disable-next-line security/no-inline-assembly
@@ -68,7 +69,7 @@ contract AccountCreator is MultiOwned {
     }
 
     function getCounterfactualAccountAddress(address[] calldata _keys, address[] calldata _backups, bytes32 _salt) external view returns(address) {
-        bytes32 newSalt = keccak256(abi.encodePacked(_salt, _keys, _backups));
+        bytes32 newSalt = keccak256(abi.encode(_salt, _keys, _backups));
         bytes memory code = abi.encodePacked(type(AccountProxy).creationCode, uint256(accountImpl));
         bytes32 hash = keccak256(abi.encodePacked(bytes1(0xff), address(this), newSalt, keccak256(code)));
         address account = address(uint160(uint256(hash)));
