@@ -16,7 +16,6 @@ contract TransferLogic is BaseLogic {
 
     // *************** Events *************************** //
 
-    event TransferLogicInitialised(address indexed account);
     event TransferLogicEntered(bytes data, uint256 indexed nonce);
 
     // *************** Constructor ********************** //
@@ -26,13 +25,6 @@ contract TransferLogic is BaseLogic {
 		public
 	{
 	}
-
-    // *************** Initialization ********************* //
-
-    // enable staic call 'onERC721Received' from base account
-    function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        emit TransferLogicInitialised(address(_account));
-    }
 
     // *************** action entry ********************* //
 

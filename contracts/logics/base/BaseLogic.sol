@@ -21,8 +21,6 @@ contract BaseLogic {
         _;
     }
 
-    event LogicInitialised(address wallet);
-
     // *************** Constructor ********************** //
 
     constructor(AccountStorage _accountStorage) public {
@@ -32,7 +30,6 @@ contract BaseLogic {
     // *************** Initialization ********************* //
 
     function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        emit LogicInitialised(address(_account));
     }
 
     // *************** Getter ********************** //

@@ -4,7 +4,6 @@ import "./base/AccountBaseLogic.sol";
 
 contract ProposalLogic is AccountBaseLogic {
 
-    event ProposalLogicInitialised(address indexed account);
     event ProposalExecuted(address indexed client, address indexed proposer, bytes functionData);
 	event ChangeAdminKeyByBackup(address indexed account, address indexed pkNew);
 	event ChangeAdminKeyByBackupTriggered(address indexed account, address pkNew);
@@ -17,14 +16,6 @@ contract ProposalLogic is AccountBaseLogic {
         public
         AccountBaseLogic(_accountStorage)
     {
-    }
-
-    // *************** Initialization ********************* //
-    function initAccount(Account _account)
-        external
-        allowAccountCallsOnly(_account)
-    {
-        emit ProposalLogicInitialised(address(_account));
     }
 
     // *************** Proposal ********************** //

@@ -16,7 +16,6 @@ contract AccountLogic is AccountBaseLogic {
 
 
     event AccountLogicEntered(bytes data, uint256 indexed nonce);
-	event AccountLogicInitialised(address indexed account);
 	event ChangeAdminKeyTriggered(address indexed account, address pkNew);
 	event ChangeAllOperationKeysTriggered(address indexed account, address[] pks);
 	event UnfreezeTriggered(address indexed account);
@@ -41,12 +40,6 @@ contract AccountLogic is AccountBaseLogic {
 		public
 	{
 	}
-
-    // *************** Initialization ********************* //
-
-	function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        emit AccountLogicInitialised(address(_account));
-    }
 
 	// *************** action entry ********************** //
 

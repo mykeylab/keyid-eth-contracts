@@ -12,7 +12,6 @@ contract DualsigsLogic is AccountBaseLogic {
 	// Equals to bytes4(keccak256("proposeByBoth(address,address,bytes)"))
 	bytes4 private constant PROPOSE_BY_BOTH = 0x7548cb94;
 
-    event DualsigsLogicInitialised(address indexed account);
     event DualsigsLogicEntered(bytes data, uint256 indexed clientNonce, uint256 backupNonce);
 	event AddBackup(address indexed account, address indexed backup);
 	event ProposeByBoth(address indexed client, address indexed backup, bytes functionData);
@@ -24,12 +23,6 @@ contract DualsigsLogic is AccountBaseLogic {
 		public
 	{
 	}
-
-    // *************** Initialization ********************* //
-
-    function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        emit DualsigsLogicInitialised(address(_account));
-    }
 
 	// *************** action entry ********************** //
 

@@ -18,7 +18,6 @@ contract DappLogic is BaseLogic {
 
     // *************** Events *************************** //
 
-    event DappLogicInitialised(address indexed account);
     event DappLogicEntered(bytes data, uint256 indexed nonce);
 
     // *************** Constructor ********************** //
@@ -26,12 +25,6 @@ contract DappLogic is BaseLogic {
         BaseLogic(_accountStorage)
         public
     {
-    }
-
-    // *************** Initialization ********************* //
-
-    function initAccount(Account _account) external allowAccountCallsOnly(_account){
-        emit DappLogicInitialised(address(_account));
     }
 
     // *************** action entry ********************* //
