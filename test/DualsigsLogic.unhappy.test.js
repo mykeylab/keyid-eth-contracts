@@ -197,6 +197,50 @@ contract("DualsigsLogic unhappy", accounts => {
 		let backupKey = await accountStorage.getKeyData(backup, 4);
 		let backupSig = await getSig(dualsigsLogic.address, data, backupNonce, backupKey);
         await truffleAssert.reverts(dualsigsLogic.enter(data,clientSig,backupSig,clientNonce,backupNonce), "enterWithDualSigs failed");
+	});
+
+    it('should not allow proposal with masqueraded data', async () => {
+		let clientNonce = '';
+		let backupNonce = await getNonce();
+		let client = baseAccount.address;
+        let backup = baseAccount1.address;
+		let fData = web3.eth.abi.encodeFunctionCall({
+            name: 'changeAllOperationKeysWithoutDelay',
+            type: 'function',
+            inputs: [{
+                type: 'address',
+                name: 'account'
+            },{
+                type: 'address[]',
+                name: 'pks'
+            }]
+		}, [client, [account2,account2,account2,account2]]);
+		// console.log(fData);
+		fData = '0x00000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000441d2e500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e4'+fData.slice(2);
+		let data = web3.eth.abi.encodeFunctionCall({
+						name: 'proposeByBoth',
+						type: 'function',
+						inputs: [{
+							type: 'address',
+							name: 'account'
+						},{
+							type: 'address',
+							name: 'backup'
+						},{
+							type: 'bytes',
+							name: 'data'
+						}]
+					}, [client, backup, fData]);
+		data = data.slice(0,64*2+10)+data.slice(64*4+10);
+		// console.log("data:",data);
+		// client sign with admin key
+		let clientKey = await accountStorage.getKeyData(client, 0);
+		let clientSig = await getSig(dualsigsLogic.address, data, clientNonce, clientKey);
+		// backup sign with assist key
+		let backupKey = await accountStorage.getKeyData(backup, 4);
+		let backupSig = await getSig(dualsigsLogic.address, data, backupNonce, backupKey);
+		// will be recognized as changeAllOperationKeysWithoutDelay
+        await truffleAssert.reverts(dualsigsLogic.enter(data,clientSig,backupSig,clientNonce,backupNonce), "nonce too small");
     });
 
     it('should not allow non-backup', async () => {
