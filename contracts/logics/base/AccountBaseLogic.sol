@@ -64,13 +64,13 @@ contract AccountBaseLogic is BaseLogic {
     function clearRelatedProposalAfterAdminKeyChanged(address payable _client) internal {
         //clear any existing proposal proposed by both, proposer is _client
         accountStorage.clearProposalData(_client, _client, CHANGE_ADMIN_KEY_WITHOUT_DELAY);
+        accountStorage.clearProposalData(_client, _client, CHANGE_ALL_OPERATION_KEYS_WITHOUT_DELAY);
+        accountStorage.clearProposalData(_client, _client, UNFREEZE_WITHOUT_DELAY);
 
         //clear any existing proposal proposed by backup, proposer is one of the backups
         for (uint256 i = 0; i <= MAX_DEFINED_BACKUP_INDEX; i++) {
             address backup = accountStorage.getBackupAddress(_client, i);
-            uint256 effectiveDate = accountStorage.getBackupEffectiveDate(_client, i);
-            uint256 expiryDate = accountStorage.getBackupExpiryDate(_client, i);
-            if (backup != address(0) && isEffectiveBackup(effectiveDate, expiryDate)) {
+            if (backup != address(0)) {
                 accountStorage.clearProposalData(_client, backup, CHANGE_ADMIN_KEY_BY_BACKUP);
             }
         }
