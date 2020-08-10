@@ -9,16 +9,18 @@ MYKEY has 3 main characteristics:
 
 MYKEY smart contracts can be divided by function into 4 main modules: **Account Module, Account Storage Module, Logic Management Module and Logic Module.**  
 
-Contract     | Mainnet Address  
-------------- | ------------- 
-Account  | 0xEf004D954999EB9162aeB3989279eFf2161D5095 
-AccountCreator  | 0x185479FB2cAEcbA11227db4186046496D6230243 
-AccountStorage  | 0xADc92d1fD878580579716d944eF3460E241604b7 
-LogicManager  | 0xDF8aC96BC9198c610285b3d1B29de09621B04528 
-AccountLogic  | 0x6A3f8fE26c22f6Ec7938ee046a69293F6C692B6F 
-DualsigsLogic  | 0xB9D2FcBF411DdB9CdFF0A705abD401217221012A 
-TransferLogic  | 0x1C2349ACBb7f83d07577692c75B6D7654899BF10 
-DappLogic  | 0x847f5AbbA6A36c727eCfF76784eE3648BA868808 
+Contract     | Mainnet Address  | Ropsten Testnet Address
+------------- | ------------- | ------------- 
+Account  | 0xEf004D954999EB9162aeB3989279eFf2161D5095 | 0xcb72410150c06CfA95E224dA868EC12e8876FAD5
+AccountCreator  | 0x185479FB2cAEcbA11227db4186046496D6230243 | 0x7E7cBD4e3a5D66FBD67f1CF46d4376ade597a060
+AccountStorage  | 0xADc92d1fD878580579716d944eF3460E241604b7 | 0x6185Dd4709982c03750e03FA8b3fF30D042585b9
+LogicManager  | 0xDF8aC96BC9198c610285b3d1B29de09621B04528 | 0x9651C050C7E43d84e20629149000C96CF3D8e258
+AccountLogic  | 0x6A3f8fE26c22f6Ec7938ee046a69293F6C692B6F | 0x2F1396Dfc9b799AdEE4277077aE0d99a9Aa091da
+TransferLogic  | 0x1C2349ACBb7f83d07577692c75B6D7654899BF10 | 0x115B2d8588A31dAfC2A97dE455e946fA9F95F039
+DualsigsLogic  | 0xB9D2FcBF411DdB9CdFF0A705abD401217221012A | 0x4E5ACA81a1276805c09E724EB550a1DA06Fc840E
+DappLogic  | 0x847f5AbbA6A36c727eCfF76784eE3648BA868808 | 0x6175A38E605436dD34A0a36FfEDAC621F7c8E28d
+ProposalLogic | -- | 0xd9144d661B9E5F6eF838645116545CADCB589221
+CommonStaticLogic | -- | 0xc34963be7C465f708CA979eed77CF97796dA5DfB
 
 # Account Module
 Account Module is composed with account template contract(Account.sol) and account proxy contract(AccountProxy.sol). Account template contract is the specific implementation of MYKEY account, while account proxy contract delegates all invocations to account template contract, executing specific operations. This proxy mechanism can save gas costs of creating a huge amount of accounts.  
