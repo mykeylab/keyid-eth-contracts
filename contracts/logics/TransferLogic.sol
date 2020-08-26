@@ -67,11 +67,13 @@ contract TransferLogic is BaseLogic {
         // solium-disable-next-line security/no-low-level-calls
         (success, res) = _from.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _token, 0, methodData));
         require(success, "calling invoke failed");
-        if (res.length > 0) {
+        if (res.length > 0) {//compatible with old account template which has no 'invoke()' return value
             res = abi.decode(res, (bytes));
-            bool r;
-            r = abi.decode(res, (bool));
-            require(r, "transferErc20 return false");
+            if (res.length > 0) {
+                bool r;
+                r = abi.decode(res, (bool));
+                require(r, "transferErc20 return false");
+            }
         }
     }
 
@@ -85,11 +87,13 @@ contract TransferLogic is BaseLogic {
         // solium-disable-next-line security/no-low-level-calls
         (success, res) = _approvedSpender.call(abi.encodeWithSignature("invoke(address,uint256,bytes)", _token, 0, methodData));
         require(success, "calling invoke failed");
-        if (res.length > 0) {
+        if (res.length > 0) {//compatible with old account template which has no 'invoke()' return value
             res = abi.decode(res, (bytes));
-            bool r;
-            r = abi.decode(res, (bool));
-            require(r, "transferFrom return false");
+            if (res.length > 0) {
+                bool r;
+                r = abi.decode(res, (bool));
+                require(r, "transferFrom return false");
+            }
         }
     }
 
