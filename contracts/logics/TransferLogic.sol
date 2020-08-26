@@ -69,7 +69,7 @@ contract TransferLogic is BaseLogic {
         require(success, "calling invoke failed");
         if (res.length > 0) {//compatible with old account template which has no 'invoke()' return value
             res = abi.decode(res, (bytes));
-            if (res.length > 0) {
+            if (res.length > 0) {//compatible with "Bad" ERC20 token like USDT
                 bool r;
                 r = abi.decode(res, (bool));
                 require(r, "transferErc20 return false");
@@ -89,7 +89,7 @@ contract TransferLogic is BaseLogic {
         require(success, "calling invoke failed");
         if (res.length > 0) {//compatible with old account template which has no 'invoke()' return value
             res = abi.decode(res, (bytes));
-            if (res.length > 0) {
+            if (res.length > 0) {//compatible with "Bad" ERC20 token like USDT
                 bool r;
                 r = abi.decode(res, (bool));
                 require(r, "transferFrom return false");
