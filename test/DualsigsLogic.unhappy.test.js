@@ -122,7 +122,7 @@ contract("DualsigsLogic unhappy", accounts => {
     // *************** propose by both ********************** //
 
 	it('should not allow invalid client in data', async () => {
-		let clientNonce = '';
+		let clientNonce = 0;
 		let backupNonce = await getNonce();
 		let client = baseAccount.address;
         let backup = baseAccount1.address;
@@ -200,7 +200,7 @@ contract("DualsigsLogic unhappy", accounts => {
 	});
 
     it('should not allow proposal with masqueraded data', async () => {
-		let clientNonce = '';
+		let clientNonce = 0;
 		let backupNonce = await getNonce();
 		let client = baseAccount.address;
         let backup = baseAccount1.address;
@@ -244,7 +244,7 @@ contract("DualsigsLogic unhappy", accounts => {
     });
 
     it('should not allow non-backup', async () => {
-		let clientNonce = '';
+		let clientNonce = 0;
 		let backupNonce = await getNonce();
 		let client = baseAccount.address;
         let backup = baseAccount2.address;
